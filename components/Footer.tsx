@@ -10,7 +10,7 @@ export default function Footer() {
     >
       <p className={tw`mx-5 mb-3`}>
         <span className={tw`pb-5 font-mono`}>
-          <a href="https://github.com/moncefplastin07/tweet-to-image-with-fresh">
+          <a href="https://github.com/moncefplastin07/tweety">
             Source Code
           </a>
         </span>
