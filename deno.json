@@ -1,0 +1,14 @@
+{
+  "tasks": {
+    "start": "deno run --unstable -A --watch=static/,routes/,islands/ dev.ts"
+  },
+  "importMap": "./import_map.json",
+  "compilerOptions": {
+    "lib": [
+      "esnext",
+      "dom",
+      "dom.iterable",
+      "es2016"
+    ]
+  }
+}
