@@ -12,6 +12,10 @@ export default function Counter() {
   const [isRTL, setIsRTL] = useState(false);
   const [addWatermark, setAddWartermark] = useState(true);
   const [padding, setPadding] = useState(5);
+  const [copyToClipboardStatus, setCopyToClipboardCopyStatus] = useState(null);
+  const [showCopyToClipboardStatus, setShowCopyToClipboardStatus] = useState(
+    false,
+  );
   const gradientColorList = [
     "linear-gradient(328deg, rgb(146, 87, 118), rgb(194, 0, 58))",
     "linear-gradient(150deg, rgb(99, 68, 223), rgb(101, 153, 244))",
@@ -61,6 +65,16 @@ export default function Counter() {
     setRandomBackgound(e.target.value);
   };
   const saveAs = async () => {
+    const url = window.URL;
+    const blob = await nodeToBlobImage();
+    const link = document.createElement("a");
+    link.download = `tweet from @${
+      tweetInformation?.data?.includes.users[0].username
+    }(${tweetInformation?.data?.includes.users[0].name})`;
+    link.href = url.createObjectURL(blob);
+    link.click();
+  };
+  const nodeToBlobImage = async () => {
     const node = document?.getElementById("tweetContent");
     const style = {
       transform: "scale(2)",
@@ -73,19 +87,28 @@ export default function Counter() {
       quality: 1,
       style,
     };
-    const blob = await domtoimage.toBlob(
+    return await domtoimage.toBlob(
       document?.getElementById("tweetContent"),
       param,
     );
-    const url = window.URL;
-    const link = document.createElement("a");
-    link.download = `tweet from @${
-      tweetInformation?.data?.includes.users[0].username
-    }(${tweetInformation?.data?.includes.users[0].name})`;
-    link.href = url.createObjectURL(blob);
-    link.click();
   };
-
+  const copyToClipboard = async () => {
+    setShowCopyToClipboardStatus(true);
+    setTimeout(() => {
+      setShowCopyToClipboardStatus(false);
+    }, 5000);
+    try {
+      const blob = await nodeToBlobImage();
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          [blob.type]: blob,
+        }),
+      ]);
+      setCopyToClipboardCopyStatus({ isCopied: true });
+    } catch (error) {
+      setCopyToClipboardCopyStatus({ isCopied: false });
+    }
+  };
   return (
     <div class={tw`border border-gray-200 rounded-md font-sans `}>
       <div className={tw`mx-5 my-5`}>
@@ -149,7 +172,10 @@ export default function Counter() {
             <div
               className={tw`p-5  bg-white rounded-md shadow-xl bg-opacity-40	 `}
             >
-              <div dir={isRTL ? "RTL" : "LTR"} className={tw`w-full whitespace-pre-line	`}>
+              <div
+                dir={isRTL ? "RTL" : "LTR"}
+                className={tw`w-full whitespace-pre-line	`}
+              >
                 <div className={tw`flex`}>
                   <img
                     className={tw`rounded-full mx-5`}
@@ -225,10 +251,33 @@ export default function Counter() {
               Save As
             </button>
             <button
+              onClick={copyToClipboard}
+              className={tw`mx-5 my-3 px-5 py-2 border border-gray-200 rounded-md`}
+            >
+              Copy
+            </button>
+            {showCopyToClipboardStatus
+              ? (copyToClipboardStatus
+                ? (
+                  <span
+                    className={tw`mx-5 my-3 px-5 py-2 border border-gray-200 rounded-md ${
+                      !copyToClipboardStatus?.isCopied
+                        ? "text-red-500 border-red-200 bg-red-50"
+                        : ""
+                    }`}
+                  >
+                    {copyToClipboardStatus?.isCopied
+                      ? "Image Copied Done!"
+                      : "Error: Image don't copied"}
+                  </span>
+                )
+                : "")
+              : ""}
+              <button
               onClick={() => setAddWartermark(!addWatermark)}
               className={tw`mx-5 my-3 px-5 py-2 border border-gray-200 rounded-md`}
             >
-              {addWatermark ? "remove" : "add"} Watermark
+              {addWatermark ? "Remove" : "Add"} watermark
             </button>
           </div>
         )
