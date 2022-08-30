@@ -9,12 +9,23 @@ export default function Home() {
     <div className={tw`p-4 mx-auto max-w-screen-md bg-cyan-500 my-5`}>
       <Head>
         <title>
-        Tweet to Image
+          Tweet to Image
         </title>
       </Head>
-      <h1 className={tw`text-3xl my-6 font-bold`} style="color: rgb(14 165 233);"><span className={tw`rounded-md text-white px-3 py-1`} style="background: rgb(14 165 233);">Tweet</span> to <span>Image</span></h1>
-      <Convertor/>
-      <Footer/>
+      <h1
+        className={tw`text-3xl my-6 font-bold`}
+        style="color: rgb(14 165 233);"
+      >
+        <span
+          className={tw`rounded-md text-white px-3 py-1`}
+          style="background: rgb(14 165 233);"
+        >
+          Tweet
+        </span>{" "}
+        to <span>Image</span>
+      </h1>
+      <Convertor />
+      <Footer />
     </div>
   );
 }
