@@ -149,7 +149,7 @@ export default function Counter() {
             <div
               className={tw`p-5  bg-white rounded-md shadow-xl bg-opacity-40	 `}
             >
-              <div dir={isRTL ? "RTL" : "LTR"} className={tw`w-full`}>
+              <div dir={isRTL ? "RTL" : "LTR"} className={tw`w-full whitespace-pre-line	`}>
                 <div className={tw`flex`}>
                   <img
                     className={tw`rounded-full mx-5`}
