@@ -4,30 +4,38 @@ import { h } from "preact";
 import { useState } from "preact/hooks";
 import { tw } from "@twind";
 import domtoimage from "https://esm.sh/dom-to-image@2.6.0";
+import Spinner from "./../components/Spinner.tsx";
+import ToggleButton from "../components/ToggleButton.tsx";
 export default function Counter() {
   const [tweetInformation, setTweetInformation] = useState(null);
   const [randomBackgound, setRandomBackgound] = useState(
     "linear-gradient(225deg, rgb(207, 172, 197), rgb(34, 151, 164));",
   );
-  const [isRTL, setIsRTL] = useState(false);
+  const [tweetTextDirection, setTweetTextDirection] = useState("auto");
   const [addWatermark, setAddWartermark] = useState(true);
   const [padding, setPadding] = useState(5);
   const [copyToClipboardStatus, setCopyToClipboardCopyStatus] = useState(null);
   const [showCopyToClipboardStatus, setShowCopyToClipboardStatus] = useState(
     false,
   );
+  const [onWorking, setOnWorking] = useState(false);
   const gradientColorList = [
     "linear-gradient(328deg, rgb(146, 87, 118), rgb(194, 0, 58))",
     "linear-gradient(150deg, rgb(99, 68, 223), rgb(101, 153, 244))",
     "linear-gradient(225deg, rgb(207, 172, 197), rgb(34, 151, 164))",
+    "linear-gradient(267deg, rgb(144, 190, 148), rgb(167, 64, 70))",
+    "linear-gradient(98deg, rgb(181, 252, 213), rgb(180, 237, 183))",
+    "linear-gradient(267deg, rgb(0 0 0 / .45), rgb(0 0 0 / .45))",
   ];
   const getTweetInformation = async (e) => {
     e.preventDefault();
+    setOnWorking(true);
     const tweetURL = document?.getElementById("tweetURL")?.value;
     const tweetID = tweetURL.split("/").at(-1);
     const response = await fetch(`api/tweet/${tweetID}`);
     setTweetInformation(await response.json());
     generateGrad();
+    setOnWorking(false);
   };
 
   const randomColor = () => {
@@ -40,7 +48,9 @@ export default function Counter() {
       `linear-gradient(${angle}deg, ${randomColor()}, ${randomColor()})`;
     setRandomBackgound(randomBG);
   };
-  const switchDirection = () => setIsRTL(!isRTL);
+  const switchDirection = () => {
+    setTweetTextDirection(tweetTextDirection === "LTR" ? "RTL" : "LTR");
+  };
   const publishTime = (dateString: string) => {
     const date = new Date(dateString);
 
@@ -96,7 +106,7 @@ export default function Counter() {
     setShowCopyToClipboardStatus(true);
     setTimeout(() => {
       setShowCopyToClipboardStatus(false);
-    }, 5000);
+    }, 2200);
     try {
       const blob = await nodeToBlobImage();
       await navigator.clipboard.write([
@@ -109,6 +119,15 @@ export default function Counter() {
       setCopyToClipboardCopyStatus({ isCopied: false });
     }
   };
+  const shortNumber = (number: any) => {
+    if (number < 1000) {
+      return number;
+    }
+    if (number < 1000000) {
+      return `${(number / 1000).toFixed()}k`;
+    }
+    return `${(number / 1000000).toFixed()}m`;
+  };
   return (
     <div class={tw`border border-gray-200 rounded-md font-sans `}>
       <div className={tw`mx-5 my-5`}>
@@ -117,10 +136,14 @@ export default function Counter() {
             type="text"
             name="tweetURL"
             id="tweetURL"
-            className={tw`border border-gray-200 h-16 w-full px-5`}
+            className={tw`border border-gray-200 focus:border-gray-200 h-16 w-full px-5`}
             placeholder="Enter the tweet link e.g: https://twitter.com/deno_land/status/1429746895010861056"
+            autoFocus={true}
           />
         </form>
+
+        {onWorking ? <Spinner /> : ""}
+        {addWatermark}
 
         {tweetInformation?.data
           ? (
@@ -130,7 +153,7 @@ export default function Counter() {
                   onClick={switchDirection}
                   className={tw`mx-5 my-3 px-5 py-2 border border-gray-100 rounded-md`}
                 >
-                  {isRTL ? "RTL" : "LTR"}
+                  {tweetTextDirection}
                 </button>
                 <button
                   onClick={generateGrad}
@@ -170,10 +193,10 @@ export default function Counter() {
             style={`background:${randomBackgound}; padding:${padding}%`}
           >
             <div
-              className={tw`p-5  bg-white rounded-md shadow-xl bg-opacity-40	 `}
+              className={tw`p-7 bg-white rounded-md shadow-xl bg-opacity-40	 `}
             >
               <div
-                dir={isRTL ? "RTL" : "LTR"}
+                dir={tweetTextDirection}
                 className={tw`w-full whitespace-pre-line	`}
               >
                 <div className={tw`flex`}>
@@ -204,20 +227,24 @@ export default function Counter() {
                 </div>
                 {tweetInformation?.data?.data?.text}
               </div>
-              <div>
-                <p className={tw`text-gray-700`}>
+              <div className={tw`text-gray-700`}>
+                <p>
                   {publishTime(tweetInformation?.data?.data?.created_at)} .{" "}
                   {tweetInformation?.data?.data?.source}
                 </p>
-                <span className={tw` mr-5 text-gray-500`}>
+                <span className={tw`mr-5`}>
                   <strong className={tw`mr-2 text-black`}>
-                    {tweetInformation?.data?.data?.public_metrics?.like_count}
+                    {shortNumber(
+                      tweetInformation?.data?.data?.public_metrics?.like_count,
+                    )}
                   </strong>Likes
                 </span>
-                <span className={tw` mr-5 text-gray-500`}>
+                <span className={tw`mr-5`}>
                   <strong className={tw`mr-2 text-black`}>
-                    {tweetInformation?.data?.data?.public_metrics
-                      ?.retweet_count}
+                    {shortNumber(
+                      tweetInformation?.data?.data?.public_metrics
+                        ?.retweet_count,
+                    )}
                   </strong>Retweets
                 </span>
               </div>
@@ -225,7 +252,7 @@ export default function Counter() {
             {addWatermark
               ? (
                 <span className={tw`text-gray-100 text-opacity-40`}>
-                  generated By {window.location.href}
+                  generated By {window.location.host}
                 </span>
               )
               : ""}
@@ -243,7 +270,7 @@ export default function Counter() {
 
       {tweetInformation?.data
         ? (
-          <div>
+          <div className={tw`grid grid-cols-4`}>
             <button
               onClick={saveAs}
               className={tw`mx-5 my-3 px-5 py-2 border border-gray-200 rounded-md`}
@@ -252,33 +279,39 @@ export default function Counter() {
             </button>
             <button
               onClick={copyToClipboard}
-              className={tw`mx-5 my-3 px-5 py-2 border border-gray-200 rounded-md`}
+              className={tw`mx-5 my-3 px-5 py-2 border border-gray-200 rounded-md relative`}
             >
               Copy
+              {showCopyToClipboardStatus
+                ? (copyToClipboardStatus
+                  ? (
+                    <span
+                      className={tw`absolute bottom-10 bg-opacity-40 min-w-max mx-5 my-3  p-2 border-0 outline-none bg-white text-sm rounded-md ${
+                        !copyToClipboardStatus?.isCopied
+                          ? "text-red-500 border-red-200 bg-red-50"
+                          : ""
+                      }`}
+                    >
+                      {copyToClipboardStatus?.isCopied
+                        ? "Image Copied Done!"
+                        : "Error: Image don't copied"}
+                    </span>
+                  )
+                  : "")
+                : ""}
             </button>
-            {showCopyToClipboardStatus
-              ? (copyToClipboardStatus
-                ? (
-                  <span
-                    className={tw`mx-5 my-3 px-5 py-2 border border-gray-200 rounded-md ${
-                      !copyToClipboardStatus?.isCopied
-                        ? "text-red-500 border-red-200 bg-red-50"
-                        : ""
-                    }`}
-                  >
-                    {copyToClipboardStatus?.isCopied
-                      ? "Image Copied Done!"
-                      : "Error: Image don't copied"}
-                  </span>
-                )
-                : "")
-              : ""}
-              <button
-              onClick={() => setAddWartermark(!addWatermark)}
-              className={tw`mx-5 my-3 px-5 py-2 border border-gray-200 rounded-md`}
-            >
-              {addWatermark ? "Remove" : "Add"} watermark
-            </button>
+
+            <div className={tw`mx-5  py-6 inline-flex`}>
+              <span className={tw`mx-3 font-bold text-gray-700`}>
+                Watermark:
+              </span>
+              <ToggleButton
+                isChecked={addWatermark}
+                onChange={() => setAddWartermark(!addWatermark)}
+              >
+                Watermark
+              </ToggleButton>
+            </div>
           </div>
         )
         : ""}
