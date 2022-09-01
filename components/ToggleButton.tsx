@@ -2,14 +2,16 @@
 
 import { h } from "preact";
 import { tw } from "@twind";
+import { uniqueString } from "https://deno.land/x/uniquestring/mod.ts";
 
 export default function ToggleButton(props: any) {
+  const uniqueID = uniqueString()
   return (
-    <label for="default-toggle" className={tw`cursor-pointer`}>
+    <label for={`toggle-for-${uniqueID}`} className={tw`cursor-pointer`}>
       <input
         type="checkbox"
         value=""
-        id="default-toggle"
+        id={`toggle-for-${uniqueID}`}
         className={tw`sr-only peer`}
         {...props}
         checked={props.isChecked}

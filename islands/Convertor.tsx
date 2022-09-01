@@ -19,12 +19,17 @@ export default function Counter() {
     false,
   );
   const [onWorking, setOnWorking] = useState(false);
+  const [showTweetMetrics, setShowTweetMetrics] = useState(true);
+  const [showTweetTime, setShowTweetTime] = useState(true);
+  const [showTweetSource, setShowTweetSource] = useState(true);
   const gradientColorList = [
     "linear-gradient(328deg, rgb(146, 87, 118), rgb(194, 0, 58))",
     "linear-gradient(150deg, rgb(99, 68, 223), rgb(101, 153, 244))",
     "linear-gradient(225deg, rgb(207, 172, 197), rgb(34, 151, 164))",
     "linear-gradient(267deg, rgb(144, 190, 148), rgb(167, 64, 70))",
     "linear-gradient(98deg, rgb(181, 252, 213), rgb(180, 237, 183))",
+    "linear-gradient(24deg, rgb(131, 24, 76), rgb(125, 221, 175))",
+    "linear-gradient(144deg, rgb(168, 104, 200), rgb(77, 137, 146))",
     "linear-gradient(267deg, rgb(0 0 0 / .45), rgb(0 0 0 / .45))",
   ];
   const getTweetInformation = async (e) => {
@@ -181,6 +186,44 @@ export default function Counter() {
                   />
                 ))}
               </div>
+              <div className={tw`grid grid-cols-4 mx-5  py-6`}>
+                <div className={tw`inline-flex`}>
+                  <span className={tw`mx-3 font-bold text-gray-600`}>
+                    Metrics:
+                  </span>
+                  <ToggleButton
+                    isChecked={showTweetMetrics}
+                    onChange={() => setShowTweetMetrics(!showTweetMetrics)}
+                  />
+                </div>
+                <div className={tw`inline-flex`}>
+                  <span className={tw`mx-3 font-bold text-gray-600`}>
+                    Time:
+                  </span>
+                  <ToggleButton
+                    isChecked={showTweetTime}
+                    onChange={() => setShowTweetTime(!showTweetTime)}
+                  />
+                </div>
+                <div className={tw`inline-flex`}>
+                  <span className={tw`mx-3 font-bold text-gray-600`}>
+                    Source:
+                  </span>
+                  <ToggleButton
+                    isChecked={showTweetSource}
+                    onChange={() => setShowTweetSource(!showTweetSource)}
+                  />
+                </div>
+                <div className={tw`inline-flex`}>
+                  <span className={tw`mx-3 font-bold text-gray-700`}>
+                    Watermark:
+                  </span>
+                  <ToggleButton
+                    isChecked={addWatermark}
+                    onChange={() => setAddWartermark(!addWatermark)}
+                  />
+                </div>  
+              </div>
             </div>
           )
           : ""}
@@ -228,25 +271,34 @@ export default function Counter() {
                 {tweetInformation?.data?.data?.text}
               </div>
               <div className={tw`text-gray-700`}>
-                <p>
-                  {publishTime(tweetInformation?.data?.data?.created_at)} .{" "}
-                  {tweetInformation?.data?.data?.source}
-                </p>
-                <span className={tw`mr-5`}>
-                  <strong className={tw`mr-2 text-black`}>
-                    {shortNumber(
-                      tweetInformation?.data?.data?.public_metrics?.like_count,
-                    )}
-                  </strong>Likes
-                </span>
-                <span className={tw`mr-5`}>
-                  <strong className={tw`mr-2 text-black`}>
-                    {shortNumber(
-                      tweetInformation?.data?.data?.public_metrics
-                        ?.retweet_count,
-                    )}
-                  </strong>Retweets
-                </span>
+                {
+                  showTweetSource || showTweetTime ? (
+                      <p>
+                        {showTweetTime ? publishTime(tweetInformation?.data?.data?.created_at) : ""} {" "}
+                        {showTweetSource ? `. ${tweetInformation?.data?.data?.source}` : ""}
+                      </p>
+                  ) : ""
+                }
+                {showTweetMetrics ? (
+                  <div>
+                    <span className={tw`mr-5`}>
+                      <strong className={tw`mr-2 text-black`}>
+                        {shortNumber(
+                          tweetInformation?.data?.data?.public_metrics?.like_count,
+                        )}
+                      </strong>Likes
+                    </span>
+                    <span className={tw`mr-5`}>
+                      <strong className={tw`mr-2 text-black`}>
+                        {shortNumber(
+                          tweetInformation?.data?.data?.public_metrics
+                            ?.retweet_count,
+                        )}
+                      </strong>Retweets
+                    </span>
+                  </div>
+                ) :
+                ""}
               </div>
             </div>
             {addWatermark
@@ -300,18 +352,6 @@ export default function Counter() {
                   : "")
                 : ""}
             </button>
-
-            <div className={tw`mx-5  py-6 inline-flex`}>
-              <span className={tw`mx-3 font-bold text-gray-700`}>
-                Watermark:
-              </span>
-              <ToggleButton
-                isChecked={addWatermark}
-                onChange={() => setAddWartermark(!addWatermark)}
-              >
-                Watermark
-              </ToggleButton>
-            </div>
           </div>
         )
         : ""}
